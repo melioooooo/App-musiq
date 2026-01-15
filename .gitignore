@@ -1,0 +1,14 @@
+.env
+__pycache__/
+*.png
+!game_icon.png
+!clock_vertical.png
+!clock_weather.png
+# Keep these if they are meant to be templates or static assets, 
+# but usually generated images should be ignored.
+# Given they were listed as generated, I will ignore all pngs except those that might be assets.
+current_album.png
+clock_weather.png
+game_icon.png
+temp_capture.bmp
+black_screen.png

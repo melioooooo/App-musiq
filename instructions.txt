@@ -1,0 +1,9 @@
+95:0B:57:BF:8F:8D
+
+pypixelcolor -a 95:0B:57:BF:8F:8D -c send_text "Hello pypixelcolor"
+
+open cmd
+
+python custom_clock.py
+python panel_off.py
+python sync_music.py
