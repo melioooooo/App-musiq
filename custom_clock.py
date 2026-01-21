@@ -62,55 +62,93 @@ class CustomClock:
         return self.last_weather
 
     def draw_weather_pictogram(self, draw, code):
-        """Draws a refined 16x32 weather pictogram on the left side, with night mode support."""
+        """Draws a highly granular 16x32 weather pictogram on the left side."""
         code = int(code) if code else 113
-        
-        # Determine if it's night (e.g., between 7 PM and 7 AM)
         hour = int(time.strftime("%H"))
         is_night = hour >= 19 or hour < 7
 
-        # Sunny / Clear
+        # 1. SUNNY / CLEAR
         if code == 113: 
             if is_night:
-                # Moon: Crescent shape
-                draw.ellipse([4, 12, 12, 20], fill=(240, 240, 240)) # Main circle
-                draw.ellipse([7, 10, 15, 18], fill=(0, 0, 0)) # Masking circle to create crescent
+                # Moon
+                draw.ellipse([4, 12, 12, 20], fill=(240, 240, 240))
+                draw.ellipse([7, 10, 15, 18], fill=(0, 0, 0))
             else:
-                # Sun: Filled circle
+                # Sun
                 draw.ellipse([5, 13, 11, 19], fill=(255, 200, 0))
-                # 8 rays around the sun
-                # cardinal
                 draw.point([(8, 11), (8, 21), (3, 16), (13, 16)], fill=(255, 180, 0))
-                # diagonal
                 draw.point([(5, 13), (11, 13), (5, 19), (11, 19)], fill=(255, 150, 0))
-            
-        # Cloudy / Mist
-        elif code in [116, 119, 122, 143, 248, 260]:
-            # Refined Fluffy Cloud (slightly darker at night)
-            base_col = (100, 100, 120) if is_night else (180, 180, 180)
-            draw.ellipse([3, 15, 10, 21], fill=base_col) # Left hump
-            draw.ellipse([7, 16, 13, 22], fill=(base_col[0]-40, base_col[1]-40, base_col[2]-40)) # Right hump
-            draw.ellipse([5, 13, 11, 18], fill=(base_col[0]+40, base_col[1]+40, base_col[2]+40)) # Top hump
-            
-        # Rain / Drizzle
-        elif code in [176, 263, 266, 281, 284, 293, 296, 299, 302, 305, 308, 311]:
-            # Cloud + raindrops
-            draw.ellipse([3, 12, 12, 18], fill=(80, 80, 130) if is_night else (100, 100, 150))
-            draw.point([(5, 20), (9, 21), (6, 23), (11, 24)], fill=(0, 150, 255))
-            
-        # Snow / Ice
-        elif code in [179, 182, 185, 227, 230, 314, 317, 320, 323, 326, 329, 332]:
-            # Snowflake-like dots
-            draw.point([(8, 11), (5, 14), (11, 14), (8, 17), (5, 20), (11, 20), (8, 23)], fill=(255, 255, 255))
 
-        # Thunder
-        elif code in [200, 386, 389, 392]:
-            # Dark cloud + bolt
-            draw.ellipse([3, 12, 12, 18], fill=(40, 40, 60) if is_night else (60, 60, 80))
+        # 2. PARTLY CLOUDY
+        elif code == 116:
+            if is_night:
+                # Small Moon behind cloud
+                draw.ellipse([7, 11, 13, 17], fill=(200, 200, 200))
+                draw.ellipse([9, 10, 15, 15], fill=(0, 0, 0))
+            else:
+                # Small Sun behind cloud
+                draw.ellipse([8, 11, 13, 16], fill=(255, 200, 0))
+            # Cloud
+            draw.ellipse([3, 15, 10, 21], fill=(120, 120, 130) if is_night else (180, 180, 180))
+            draw.ellipse([6, 14, 13, 19], fill=(80, 80, 90) if is_night else (140, 140, 150))
+
+        # 3. CLOUDY / OVERCAST
+        elif code in [119, 122]:
+            if is_night:
+                # Tiny moon peeking from top-right
+                draw.ellipse([9, 10, 14, 15], fill=(180, 180, 180))
+                draw.ellipse([11, 9, 16, 13], fill=(0, 0, 0))
+            base = (80, 80, 100) if is_night else (160, 160, 170)
+            draw.ellipse([3, 15, 10, 21], fill=base)
+            draw.ellipse([7, 16, 13, 22], fill=(base[0]-20, base[1]-20, base[2]-20))
+            draw.ellipse([5, 13, 11, 18], fill=(base[0]+20, base[1]+20, base[2]+20))
+
+        # 4. FOG / MIST
+        elif code in [143, 248, 260]:
+            if is_night:
+                draw.ellipse([8, 11, 12, 15], fill=(60, 60, 70))
+            col = (80, 80, 100) if is_night else (180, 180, 200)
+            draw.line([(4, 14), (12, 14)], fill=col)
+            draw.line([(3, 17), (11, 17)], fill=col)
+            draw.line([(5, 20), (13, 20)], fill=col)
+
+        # 5. LIGHT RAIN / DRIZZLE
+        elif code in [176, 263, 266, 293, 296, 353]:
+            if is_night:
+                draw.ellipse([9, 9, 14, 14], fill=(150, 150, 160))
+                draw.ellipse([11, 8, 16, 12], fill=(0, 0, 0))
+            draw.ellipse([3, 12, 12, 18], fill=(60, 60, 80) if is_night else (100, 100, 130))
+            draw.point([(6, 20), (10, 21)], fill=(0, 150, 255))
+
+        # 6. HEAVY RAIN
+        elif code in [299, 302, 305, 308, 356, 359]:
+            if is_night:
+                draw.ellipse([9, 8, 13, 12], fill=(100, 100, 110))
+                draw.ellipse([11, 7, 15, 11], fill=(0, 0, 0))
+            draw.ellipse([3, 12, 12, 18], fill=(40, 40, 55) if is_night else (70, 70, 90))
+            for x in [5, 8, 11]: draw.line([(x, 20), (x-1, 23)], fill=(0, 120, 255))
+
+        # 7. SNOW
+        elif code in [179, 227, 230, 323, 326, 329, 332, 335, 338, 368, 371]:
+            if is_night:
+                draw.ellipse([6, 10, 10, 14], fill=(60, 60, 80))
+            draw.point([(8, 12), (4, 15), (12, 15), (8, 18), (4, 21), (12, 21), (8, 24)], fill=(255, 255, 255))
+
+        # 8. SLEET / ICE PELLETS
+        elif code in [182, 185, 281, 284, 311, 314, 317, 320, 350, 362, 365, 374, 377]:
+            if is_night:
+                draw.ellipse([8, 9, 12, 13], fill=(100, 100, 120))
+            draw.ellipse([4, 12, 11, 17], fill=(120, 120, 150) if is_night else (150, 150, 180))
+            draw.point([(6, 19), (10, 20)], fill=(180, 180, 230))
+            draw.point([(8, 22)], fill=(0, 150, 255))
+
+        # 9. THUNDER
+        elif code in [200, 386, 389, 392, 395]:
+            draw.ellipse([3, 12, 12, 18], fill=(30, 30, 40) if is_night else (60, 60, 70))
             draw.line([(8, 19), (6, 22), (10, 22), (8, 26)], fill=(255, 255, 0))
         
-        else: # Default Cloud
-            draw.ellipse([3, 14, 13, 20], fill=(100, 100, 100) if is_night else (150, 150, 150))
+        else: # Default
+            draw.ellipse([3, 14, 13, 20], fill=(100, 100, 100) if is_night else (120, 120, 120))
 
     def show_time(self, color="ffffff"):
         # Create a 32x32 black canvas
